@@ -5,6 +5,7 @@ import requests
 from datetime import datetime
 from collections import Counter
 import argparse
+from typing import Generator
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -26,7 +27,17 @@ parser.add_argument("file_path", help="Path to the BIND log file")
 args = parser.parse_args()
 
 
-def parse_line(line):
+def parse_line(line: str) -> dict | None:
+    """
+    Parses a line of DNS query log and extracts the timestamp, client IP, and host.
+
+    Args:
+        line (str): The line of DNS query log to parse.
+
+    Returns:
+        dict | None: A dictionary containing the parsed information if the line matches the expected format,
+                     or None if the line does not match the expected format.
+    """
     # Regular expression to match the necessary parts: timestamp, client IP, and host
     pattern = r"(\d+-[a-zA-Z]+-\d+ \d+:\d+:\d+\.\d+) queries: info: client @0x[0-9a-f]+ ([\d\.]+)#\d+ \(([^)]+)\)"
     match = re.search(pattern, line)
@@ -42,7 +53,18 @@ def parse_line(line):
         return None
 
 
-def parse_bind_log(file_path):
+def parse_bind_log(file_path: str) -> Generator[dict, None, None]:
+    """
+    Parses a BIND log file and yields a dictionary for each parsed line.
+
+    Args:
+        file_path (str): The path to the BIND log file.
+
+    Yields:
+        dict: A dictionary containing the parsed data for each line which is in turn generated
+        by the parse_line() function.
+
+    """
     with open(file_path, "r") as file:
         for line in file:
             parsed_data = parse_line(line)
@@ -50,7 +72,24 @@ def parse_bind_log(file_path):
                 yield parsed_data
 
 
-def send_to_lumu(data_chunk):
+def send_to_lumu(data_chunk: list[dict]) -> requests.Response:
+    """
+    Sends a data chunk to Lumu API for processing. The body examples is as follow:
+
+    [ { "timestamp": "2021-01-06T14:37:02.228Z", "name": "www.example.com", "client_ip": "192.168.0.103", "client_name": "MACHINE-0987", "type": "A" } ]
+
+    type and client_name are optional and not used in this script.
+
+    Args:
+        data_chunk (list[dict]): A list of dictionaries representing the data chunk to be sent.
+
+    Returns:
+        requests.Response: The response object returned by the Lumu API.
+
+    Raises:
+        None
+
+    """
     formatted_data = [
         data for data in data_chunk if data
     ]  # Ensure all entries are valid
@@ -62,7 +101,20 @@ def send_to_lumu(data_chunk):
     return response
 
 
-def print_statistics(client_ips, queried_hosts):
+def print_statistics(client_ips: Counter, queried_hosts: Counter) -> None:
+    """
+    Prints statistics of DNS queries.
+
+    Args:
+        client_ips (Counter): Counter object containing client IP addresses and their counts.
+        queried_hosts (Counter): Counter object containing queried hosts and their counts.
+
+    Returns:
+        None
+
+    Effect:
+        Prints the statistics to the console.
+    """
     total_records = sum(client_ips.values())
     print(f"Total records {total_records}\n")
 
@@ -86,6 +138,10 @@ def print_statistics(client_ips, queried_hosts):
 
 
 def main():
+    """
+    Main function that collects DNS queries from a log file, processes them, and sends them to Lumu in chunks.
+    """
+
     client_ips = Counter()
     queried_hosts = Counter()
     data_chunk = []
