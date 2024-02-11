@@ -70,6 +70,18 @@ After successful execution, the script will output statistics to the console and
 
 ![Example](https://onedrive.live.com/embed?resid=EB59B09937B52B5D%2176401&authkey=%21AG0EoyPox1mR-8I&width=660)
 
+## Ranking algorithm computational explanation
+
+The computational complexity of the ranking algorithm which is defined in the print_statistics function is primarily determined by the most_common method of the Counter objects client_ips and queried_hosts.
+
+The most_common method in Python's collections.Counter class has a time complexity of O(n log n), where n is the number of unique elements in the Counter object. This is because most_common sorts the elements by their counts.
+
+In the print_statistics function, most_common is called twice, once for client_ips and once for queried_hosts. However, since these calls are not nested and operate on different data, the overall time complexity remains O(n log n).
+
+The rest of the operations in the function (like summing the values in the Counter, calculating percentages, and printing the results) have a time complexity of O(n), which is dominated by the O(n log n) complexity of the most_common method.
+
+So, the overall time complexity of is O(n log n).
+
 ## Contact
 
 Crozzdev - <juan.david.tvelez@hotmail> or <crozzdev95@outlook.com>
