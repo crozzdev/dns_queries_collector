@@ -96,8 +96,6 @@ def send_to_lumu(data_chunk: list[dict]) -> requests.Response:
     response = requests.post(LUMU_API_QUERY, json=formatted_data, headers=LUMU_HEADERS)
     if response.status_code != 200:
         print("Error sending data to Lumu")
-    else:
-        print("Data sent successfully")
     return response
 
 
@@ -116,25 +114,24 @@ def print_statistics(client_ips: Counter, queried_hosts: Counter) -> None:
         Prints the statistics to the console.
     """
     total_records = sum(client_ips.values())
+    TOP_HOSTS = int(os.getenv("TOP_HOSTS"))
     print(f"Total records {total_records}\n")
 
     # Client IPs Rank
-    print("Client IPs Rank")
-    print("-" * 15, "---", "-" * 5)
-    for ip, count in client_ips.most_common(
-        5
-    ):  # Adjust the number to display more or less
+    print("{:<15} {:<15} {:<10}".format("Client", "IPs", "Rank"))
+    print("-" * 40)
+    for ip, count in client_ips.most_common(TOP_HOSTS):
         percentage = (count / total_records) * 100
-        print(f"{ip} {count} {percentage:.2f}%")
-    print("-" * 15, "---", "-" * 5)
+        print("{:<15} {:<15} {:.2f}%".format(ip, count, percentage))
+    print("-" * 40)
 
     # Host Rank
-    print("\nHost Rank")
-    print("-" * 60, "---", "-" * 5)
-    for host, count in queried_hosts.most_common(5):  # Adjust accordingly
+    print("\n{:<60} {:<10}".format("Host", "Rank"))
+    print("-" * 70)
+    for host, count in queried_hosts.most_common(TOP_HOSTS):
         percentage = (count / total_records) * 100
-        print(f"{host:50} {count} {percentage:.2f}%")
-    print("-" * 60, "---", "-" * 5)
+        print("{:<60} {:.2f}%".format(host, percentage))
+    print("-" * 70)
 
 
 def main():
