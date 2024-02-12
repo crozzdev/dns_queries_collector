@@ -42,7 +42,7 @@ This command installs the requests and python-dotenv libraries, which are essent
 Create a .env file in the root directory of the project to store sensitive configuration details:
 
 ```sh
-LUMU_ENDPOINT=https://api.lumu.io/collectors/dns-query
+LUMU_ENDPOINT=https://api.lumu.io/collectors
 LUMU_API_KEY=your_lumu_api_key_here
 LUMU_COLLECTOR_ID=your_collector_id_here
 TOP_HOSTS = 5
