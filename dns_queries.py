@@ -17,6 +17,7 @@ LUMU_API_KEY = os.getenv("LUMU_API_KEY")
 LUMU_COLLECTOR_ID = os.getenv("LUMU_COLLECTOR_ID")
 LUMU_API_QUERY = f"{LUMU_ENDPOINT}/{LUMU_COLLECTOR_ID}/dns/queries?key={LUMU_API_KEY}"
 LUMU_HEADERS = {"Content-Type": "application/json"}
+TOP_HOSTS = int(os.getenv("TOP_HOSTS"))
 
 
 # Set up argument parsing for the command line
@@ -99,13 +100,16 @@ def send_to_lumu(data_chunk: list[dict]) -> requests.Response:
     return response
 
 
-def print_statistics(client_ips: Counter, queried_hosts: Counter) -> None:
+def print_statistics(
+    client_ips: Counter, queried_hosts: Counter, top_hosts: int
+) -> None:
     """
     Prints statistics of DNS queries.
 
     Args:
         client_ips (Counter): Counter object containing client IP addresses and their counts.
         queried_hosts (Counter): Counter object containing queried hosts and their counts.
+        top_hosts (int): The number of top hosts to display.
 
     Returns:
         None
@@ -114,13 +118,12 @@ def print_statistics(client_ips: Counter, queried_hosts: Counter) -> None:
         Prints the statistics to the console.
     """
     total_records = sum(client_ips.values())
-    TOP_HOSTS = int(os.getenv("TOP_HOSTS"))
     print(f"Total records {total_records}\n")
 
     # Client IPs Rank
     print("{:<15} {:<15} {:<10}".format("Client", "IPs", "Rank"))
     print("-" * 40)
-    for ip, count in client_ips.most_common(TOP_HOSTS):
+    for ip, count in client_ips.most_common(top_hosts):
         percentage = (count / total_records) * 100
         print("{:<15} {:<15} {:.2f}%".format(ip, count, percentage))
     print("-" * 40)
@@ -161,7 +164,7 @@ def main():
     if data_chunk:
         send_to_lumu(data_chunk)
 
-    print_statistics(client_ips, queried_hosts)
+    print_statistics(client_ips, queried_hosts, TOP_HOSTS)
 
 
 if __name__ == "__main__":
