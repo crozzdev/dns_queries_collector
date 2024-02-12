@@ -70,6 +70,15 @@ After successful execution, the script will output statistics to the console and
 
 ![Example](https://onedrive.live.com/embed?resid=EB59B09937B52B5D%2176401&authkey=%21AG0EoyPox1mR-8I&width=660)
 
+## Testing
+
+To run the tests, navigate to the project directory and run the following command:
+
+```sh
+pytest tests/
+
+```
+
 ## Ranking algorithm computational explanation
 
 The computational complexity of the ranking algorithm which is defined in the print_statistics function is primarily determined by the most_common method of the Counter objects client_ips and queried_hosts.
